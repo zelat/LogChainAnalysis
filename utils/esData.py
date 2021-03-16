@@ -25,7 +25,7 @@ class ElasticObj:
     #         204（无内容）  服务器成功处理了请求，但未返回任何内容。
     #         205（重置内容） 服务器成功处理了请求，但未返回任何内容。与 204 响应不同，此响应要求请求者重置文档视图（例如清除表单内容以输入新内容）。
     #         206（部分内容）  服务器成功处理了部分 GET 请求。
-    def getReqIDFromResource(self, index_name, uuid, size):
+    def getReqIDFromResource(self, index_name, uuid, vip, size):
         request_id_list = []
         doc = {
             "size": size,
@@ -65,6 +65,11 @@ class ElasticObj:
                             "match_phrase": {
                                 "uuid": uuid
                             }
+                        },
+                        {
+                            "match_phrase": {
+                                "vip": vip
+                            }
                         }
                     ],
                     "should": [],
@@ -86,7 +91,7 @@ class ElasticObj:
         except Exception as e:
             raise e
 
-    def getReqIDFromNovaCompute(self, index_name, request_id, indexList, size):
+    def getReqIDFromNovaCompute(self, index_name, vip,  request_id, indexList, size):
         dict = {}
         doc = {
             "size": size,
@@ -136,6 +141,11 @@ class ElasticObj:
                         },
                         {
                             "match_phrase": {
+                                "vip": vip
+                            }
+                        },
+                        {
+                            "match_phrase": {
                                 "request_id": request_id
                             }
                         }
@@ -151,14 +161,14 @@ class ElasticObj:
                 list = []
                 req_id = self.getReqID(hit['_source']['logmessage'])[0]
                 for index in indexList:
-                    if self.isREQIDExist(index, req_id, self.size) == True:
+                    if self.isREQIDExist(index,vip, req_id, self.size) == True:
                         list.append(index)
                 dict[req_id] = list
             return dict
         except Exception as e:
             raise e
 
-    def isREQIDExist(self, index_name, request_id, size):
+    def isREQIDExist(self, index_name,vip, request_id, size):
         doc = {
             "size": size,
             "sort": [
@@ -198,6 +208,11 @@ class ElasticObj:
                             "match_phrase": {
                                 "request_id": request_id
                             }
+                        },
+                        {
+                            "match_phrase": {
+                                "vip": vip
+                            }
                         }
                     ],
                     "should": [],
@@ -215,22 +230,22 @@ class ElasticObj:
             raise e
 
     # Resource日志中取得的resourceId与openstack的匹配关系
-    def getMappingByResource(self, resourceIndex, indexList, uuid, date, size):
+    def getMappingByResource(self, resourceIndex, indexList, uuid, vip, date, size):
         # while True:
         try:
-            resource_req_id_list = self.getReqIDFromResource(resourceIndex, uuid, size)
+            resource_req_id_list = self.getReqIDFromResource(resourceIndex, uuid, vip, size)
             dict = {}
             for req_id in resource_req_id_list:
                 newList = []
                 filterList = []
                 for index in indexList:
-                    if self.isREQIDExist(index, req_id, self.size) == True:
+                    if self.isREQIDExist(index, vip, req_id, self.size) == True:
                         filterList.append(index)
                         if index == "nova-compute-log-" + date:
                             # print('nova-compute: ',
                             #       self.getReqIDFromNovaCompute("nova-compute-log-" + date, req_id, indexList, 10))
                             indexDict = {}
-                            novaComputeDict = self.getReqIDFromNovaCompute("nova-compute-log-" + date, req_id,
+                            novaComputeDict = self.getReqIDFromNovaCompute("nova-compute-log-" + date, vip, req_id,
                                                                            indexList, 10)
                             indexDict[index] = novaComputeDict
                             if len(novaComputeDict) > 0:

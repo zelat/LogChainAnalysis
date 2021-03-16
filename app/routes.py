@@ -9,15 +9,17 @@ def index():
     if request.method == "POST":
         log_info = request.form.to_dict()
         uuid = log_info.get("uuid")
+        vip = log_info.get("vip")
         date = log_info.get("date").replace("-", ".")
     else:
-        uuid = "7cc17533-e585-4df4-8f70-dc21b0cbff93"
-        date = "2021.03.15"
+        uuid = "3e6c2689-ccea-4028-b495-ef2a18e6101b"
+        vip = "172.118.32.30"
+        date = "2021.03.16"
     resource_index = "resource-log-" + date
     obj = esData.ElasticObj("_doc")
     index_List = list(obj.indices.get_alias('*-log-' + date).keys())
     index_List.remove(resource_index)
-    mappingDict = obj.getMappingByResource(resource_index, index_List, uuid, date, 10)
+    mappingDict = obj.getMappingByResource(resource_index, index_List, uuid, vip, date, 10)
     response = json.dumps(mappingDict, sort_keys=True, indent=4, separators=(',', ': '))
     return render_template("index.html", response=response)
 
