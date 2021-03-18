@@ -1,0 +1,161 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /log/haihe/resource/resource.log
+  multiline:
+    pattern: '^\['
+    negate:  true
+    match:   after
+  fields:
+    log_topic: resource-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+    - /log/nova/nova-api.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: nova-api-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+    - /log/nova/nova-compute.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: nova-compute-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+    - /log/nova/nova-scheduler.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: nova-scheduler-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+    - /log/nova/nova-conductor.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: nova-conductor-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/cinder/api.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: cinder-api-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/cinder/volume.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: cinder-volume-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/cinder/scheduler.log
+  exclude_files: ['\.gz$']
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: cinder-scheduler-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/neutron/server.log
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: neutron-server-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/neutron/openvswitch-agent.log
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: openvswitch-agent-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/glance/api.log
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: glance-api-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/glance/registry.log
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: glance-registry-log
+    vip: 172.118.32.30
+- type: log
+  enabled: true
+  paths:
+  - /log/keystone/keystone.log
+  multiline:
+    pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}'
+    negate:  true
+    match:   after
+  fields:
+    log_topic: keystone-log
+    vip: 172.118.32.30
+output.kafka:
+  enabled: true
+  hosts: ['10.192.31.163:9092']
+  topic: '%{[fields.log_topic]}'
+  codec.json:
+    pretty: false
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip

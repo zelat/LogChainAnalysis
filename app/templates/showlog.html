@@ -98,6 +98,7 @@
         pre#json-renderer {
             border: 1px solid #aaa;
         }
+
     </style>
     <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
 </head>
@@ -120,12 +121,12 @@
         <input type="checkbox" id="with-links" checked>
         With Links
     </label>
-    <form action="#" method="post">
-        VIP: <input type="input" name="vip"/>
-        UUID: <input type="input" name="uuid" style="width:300px;"/>
-        Date: <input name="date" id="date" type="date"/>
-        <input type="submit" id="submit" value="Submit" />
-    </form>
+<form action="#" method="post">
+    VIP: <input type="input" name="vip"/>
+    UUID: <input type="input" name="uuid" style="width:300px;"/>
+    Date: <input name="date" id="date" type="date"/>
+    <input type="submit" id="submit" value="Submit"/>
+</form>
 
 </p>
 <button id="btn-json-viewer" title="run jsonViewer()">Transform to HTML</button>
@@ -134,8 +135,10 @@
         <pre id="json-renderer"></pre>
     </div>
     <div id="right" style="width: 60%;float:left;">
-        <textarea id="log-output" autocomplete="off" style="width: 90%;float: right">
-        </textarea>
+        <!--        <textarea id="log-output" autocomplete="off" style="width: 90%;float: right">-->
+        <!--        </textarea>-->
+        ERROR: <span id="errorCount" style="color: red"></span>
+        <pre id="jsonlog-renderer"></pre>
     </div>
 </div>
 </body>
@@ -245,8 +248,13 @@
                     for (var key in json) {
                         if (Object.prototype.hasOwnProperty.call(json, key)) {
                             html += '<li>';
-                            var keyRepr = options.withQuotes ?
-                                '<span class="json-string">"' + key + '"</span>' : key;
+                            if (key == '\"ERROR\"') {
+                                var keyRepr = options.withQuotes ?
+                                    '<span class="json-string" style="color: red">"' + key + '"</span>' : key;
+                            } else {
+                                var keyRepr = options.withQuotes ?
+                                    '<span class="json-string">"' + key + '"</span>' : key;
+                            }
                             // Add toggle button if item is collapsable
                             if (isCollapsable(json[key])) {
                                 html += '<a href class="json-toggle">' + keyRepr + '</a>';
@@ -329,8 +337,8 @@
     //[jquery.json-viewer.js] END
 
     $(document).ready(function () {
-        var time=new Date();
-        $("#date").val(time.toJSON().substring(0,10));
+        var time = new Date();
+        $("#date").val(time.toJSON().substring(0, 10));
         $(".json-string").click(function () {
             var indexId = $(this).text();
             var requestId = $(this).parent().parent().prev().text();
@@ -341,14 +349,27 @@
                 data: JSON.stringify(data),  //转化字符串
                 contentType: 'application/json; charset=UTF-8',
                 success: function (data) { //成功的话，得到消息
-                    var result = JSON.stringify(JSON.parse(data), null, 4);
-                    $("#right").find("#log-output").val(result);
-                },
-                error: function () {
-                    alert("接收失败")
-                }
-            });
+                    var result = JSON.parse(data);
+                    var re = data.match(/ERROR/ig);
+                    if (re == null){
+                        $('#errorCount').text(0);
+                    } else {
+                        $('#errorCount').text(re.length);
+                    }
+                    // $('#errorCount').val();
+                    var options = {
+                        collapsed: $('#collapsed').is(':checked'),
+                        rootCollapsable: $('#root-collapsable').is(':checked'),
+                        withQuotes: $('#with-quotes').is(':checked'),
+                        withLinks: $('#with-links').is(':checked')
+                    };
+                    $('#jsonlog-renderer').jsonViewer(result, options);
+            },
+            error: function () {
+                alert("接收失败")
+            }
         });
+    });
     })
 </script>
 </html>
