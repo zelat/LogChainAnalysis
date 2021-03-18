@@ -1,12 +1,16 @@
 from elasticsearch import Elasticsearch
 import re
-import json
+from app import app
+
+app.config.from_pyfile("settings.py")  # 指定setting文件
 
 class ElasticObj:
-    def __init__(self, index_type, host="10.192.31.160"):
+    def __init__(self, index_type, ):
         self.index_type = index_type
-        self.size = 500
-        self.es = Elasticsearch([host], port=9200, timeout=200)
+        self.size = app.config['SIZE']
+        self.host = app.config['ESHOST']
+        self.port = app.config['ESPORT']
+        self.es = Elasticsearch(host=self.host, port=self.port, timeout=200)
         self.indices = self.es.indices
 
     def getReqID(self, logmessage):

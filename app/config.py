@@ -1,2 +1,0 @@
-DEBUG = False
-ESHOST = "10.192.31.160"

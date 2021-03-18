@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from app import app
 import json
 from utils import esData
-import time
 
+app.config.from_pyfile("settings.py")  # 指定setting文件
 
 @app.route('/', methods=("GET", "POST"))
 def index():
@@ -14,10 +14,6 @@ def index():
         uuid = log_info.get("uuid")
         vip = log_info.get("vip")
         date = log_info.get("date").replace("-", ".")
-    # else:
-    #     uuid = "3e6c2689-ccea-4028-b495-ef2a18e6101b"
-    #     vip = "172.118.32.30"
-    #     date = "2021.03.16"
         resource_index = "resource-log-" + date
         obj = esData.ElasticObj("_doc")
         index_List = list(obj.indices.get_alias('*-log-' + date).keys())
